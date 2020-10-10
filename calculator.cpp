@@ -4,8 +4,11 @@
 
 using namespace std;
 
-double factorial(string equation, string* error){
+double factorial(string equation, string* error, double lastAns){
     double ans;
+
+    //One line if statement to make factorials work with last ans.
+    if(equation == "ANS"){ans = lastAns; goto factorialLastANS;}
 
     //trys to convert string to number, makes error if it cant
     try{
@@ -16,6 +19,8 @@ double factorial(string equation, string* error){
          return 0;
     }
 
+    factorialLastANS:
+
     //factorialises the number
     double loops = ans;
     for(double i = 1; (loops-i) > 1; i++){
@@ -24,58 +29,59 @@ double factorial(string equation, string* error){
 
     return ans;
 }
+//  Uses recursion to make math equations within math equations easier
+double calculator(string equation, string* error, double lastAns){
 
-double calculator(string equation, string* error){
-
-    //eric you comment how this works, i dont know how it works
+    //have to use two indexes becuase addition and subration go at the same time. Also used for parenthsis
     int operationIndexFirst = -1;
     int operationIndexSecond = -1;
    
     operationIndexFirst = equation.find_last_of("+");
     operationIndexSecond = equation.find_last_of("-");
 
+    //Splits the equation at the last addition and does recurstion passing the new two equations back into this function
     if((operationIndexFirst != operationIndexSecond) && (operationIndexFirst > operationIndexSecond)){
-        return calculator(equation.substr(0,operationIndexFirst), error) + calculator(equation.substr(operationIndexFirst+1), error);
+        return calculator(equation.substr(0,operationIndexFirst), error, lastAns) + calculator(equation.substr(operationIndexFirst+1), error, lastAns);
     }
-
+    //Splits the equation at the last subtraction and does recurstion passing the new two equations back into this function
     else if((operationIndexFirst != operationIndexSecond) && (operationIndexFirst < operationIndexSecond)){
-        return calculator(equation.substr(0,operationIndexSecond), error) - calculator(equation.substr(operationIndexSecond+1), error);
+        return calculator(equation.substr(0,operationIndexSecond), error, lastAns) - calculator(equation.substr(operationIndexSecond+1), error, lastAns);
     }
     
     operationIndexFirst = equation.find_last_of("*");
     operationIndexSecond = equation.find_last_of("/");
-
+    //Splits the equation at the last muplication and does recurstion passing the new two equations back into this function
     if((operationIndexFirst != operationIndexSecond) && (operationIndexFirst > operationIndexSecond)){
-        return calculator(equation.substr(0,operationIndexFirst), error) * calculator(equation.substr(operationIndexFirst+1), error);
+        return calculator(equation.substr(0,operationIndexFirst), error, lastAns) * calculator(equation.substr(operationIndexFirst+1), error, lastAns);
     }
-
+    //Splits the equation at the last division and does recurstion passing the new two equations back into this function
     else if((operationIndexFirst != operationIndexSecond) && (operationIndexFirst < operationIndexSecond)){
-        return calculator(equation.substr(0,operationIndexSecond), error) / calculator(equation.substr(operationIndexSecond+1), error);
+        return calculator(equation.substr(0,operationIndexSecond), error, lastAns) / calculator(equation.substr(operationIndexSecond+1), error, lastAns);
     }
 
     //if there is a exclmation point, pass the number before it into factorial
     int factorialindex  = equation.find_last_of("!");
     if(factorialindex > -1){
-        return(factorial(equation.substr(0, factorialindex), error));
+        return(factorial(equation.substr(0, factorialindex), error, lastAns));
     }
 
-    else
-    {
-        //adds fault tolrance for 5+7++8 and simmla repeted sign sttuations
-        if(equation == ""){
-            return 0;
-        }
-
-        //see if the equation is justy a number, if its not then set error equal to the error
-        try{
-            return stod(equation);
-        }
-        catch(exception e){
-            *error = "equation invalid at: " + equation;
-        }
-      
+    //adds fault tolrance for 5+7++8 and simmla repeted sign sttuations
+    if(equation == ""){
+        return 0;
     }
-    
+
+    //add the last answer functionality.
+    if(equation == "ANS"){
+        return lastAns;
+    }
+
+    //see if the equation is justy a number, if its not then set error equal to the error
+    try{
+        return stod(equation);
+    }
+    catch(exception e){
+        *error = "equation invalid at: " + equation;
+    }
     return 0;
 
 }
@@ -85,13 +91,14 @@ int main(){
     //this happens when the program is first run
     string input;
     string error;
+    double lastAns = -INT_MAX;
     cout << "Enter Equation: ";
     //gues to start, skiping over the message that prints is subsiquint loops
     goto start;
 
     //prints out the new message in later runs
     laterruns:
-    cout << "Enter Equation or type exit to exit: ";
+    cout << "Enter Equation or type exit to exit (You can use ANS in the calculatior for last answer ex. 1*ans*3): ";
 
     //does the auctual code
     start:
@@ -113,10 +120,15 @@ int main(){
         exit(0);
     }
 
+    if(inputUpper.find("ANS") != string::npos && lastAns == -INT_MAX){
+        cout << "You cant get the answer without having previously entered in an equation \n";
+        goto laterruns;
+    }
+
     //gets the vaue from the calculator
     //error has an and sign infromt of it beacuse it is being passed as a pointer so it can be updater from inside the function
-    int answer = calculator(input, &error);
-
+    double answer = calculator(inputUpper, &error, lastAns);
+    lastAns = answer;
     //if there is an error, show it
     if(error == ""){
         cout << answer << "\n";
