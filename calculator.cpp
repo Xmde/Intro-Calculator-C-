@@ -35,6 +35,21 @@ double calculator(string equation, string* error, double lastAns){
     //have to use two indexes becuase addition and subration go at the same time. Also used for parenthsis
     int operationIndexFirst = -1;
     int operationIndexSecond = -1;
+
+    //finds prens
+    int openprenIndex = equation.find_first_of("(");
+    int closeprenIndex = equation.find_last_of(")");
+
+    //checks that prens are valid
+    if((closeprenIndex != std::string::npos) && (openprenIndex != std::string::npos)){
+        //maxkes a new strign of the equation until the first pren + the result of wht was in the prens + the equation after the last pren
+        string newparse = equation.substr(0, openprenIndex) + to_string(calculator(equation.substr(openprenIndex+1, closeprenIndex), error, lastAns)) + equation.substr(closeprenIndex+1);
+        //restcout << "equation: " << equation << " parsed to: " << newparse << "\n";
+        //uses calculator to pars the new string
+        return calculator(newparse, error, lastAns);
+        //makes error if once pren exist but another does not
+                
+    }
    
     operationIndexFirst = equation.find_last_of("+");
     operationIndexSecond = equation.find_last_of("-");
@@ -65,9 +80,9 @@ double calculator(string equation, string* error, double lastAns){
         return(factorial(equation.substr(0, factorialindex), error, lastAns));
     }
 
-    //adds fault tolrance for 5+7++8 and simmla repeted sign sttuations
+    //adds fault tolrance for 5+7++8 and simmlar repeted sign sttuations
     if(equation == ""){
-        return 0;
+        return 0; 
     }
 
     //add the last answer functionality.
@@ -91,14 +106,14 @@ int main(){
     //this happens when the program is first run
     string input;
     string error;
-    double lastAns = -INT_MAX;
+    double lastAns = 0;
     cout << "Enter Equation: ";
     //gues to start, skiping over the message that prints is subsiquint loops
     goto start;
 
     //prints out the new message in later runs
     laterruns:
-    cout << "Enter Equation or type exit to exit (You can use ANS in the calculatior for last answer ex. 1*ans*3): ";
+    cout << "Enter Equation or type exit to exit (You can use ANS in the calculatior for last answer ex. 1*ans*3 or +5): ";
 
     //does the auctual code
     start:
@@ -107,6 +122,12 @@ int main(){
 
     //gets the user input
     cin >> input;
+
+    //checks if the first char of the input is a math porator and puts ans before it if it is. allows +1 to act as ans+1
+    char firstchar = input.at(0);
+    if((firstchar == '+') || (firstchar == '-') || (firstchar == '*') || (firstchar == '/')){
+        input = "ans"+input;
+    }
 
     //makes input uppercase
     string inputUpper;
@@ -120,18 +141,18 @@ int main(){
         exit(0);
     }
 
-    if(inputUpper.find("ANS") != string::npos && lastAns == -INT_MAX){
-        cout << "You cant get the answer without having previously entered in an equation \n";
-        goto laterruns;
-    }
+    // if(inputUpper.find("ANS") != string::npos && lastAns == -INT_MAX){
+    //     cout << "You cant get the answer without having previously entered in an equation \n";
+    //     goto laterruns;
+    // }
 
     //gets the vaue from the calculator
     //error has an and sign infromt of it beacuse it is being passed as a pointer so it can be updater from inside the function
     double answer = calculator(inputUpper, &error, lastAns);
-    lastAns = answer;
     //if there is an error, show it
     if(error == ""){
         cout << answer << "\n";
+        lastAns = answer;
     }
 
     //if there was no error, show the answer returned
