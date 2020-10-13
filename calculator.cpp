@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 using namespace std;
+//requires c++11 to compile
 
 double factorial(string equation, string* error, double lastAns){
     double ans;
@@ -40,11 +41,10 @@ double calculator(string equation, string* error, double lastAns){
     int openprenIndex = equation.find_first_of("(");
     int closeprenIndex = equation.find_last_of(")");
 
-    //checks that prens are valid
+    //checks that there is both an open and close pren
     if((closeprenIndex != std::string::npos) && (openprenIndex != std::string::npos)){
-        //maxkes a new strign of the equation until the first pren + the result of wht was in the prens + the equation after the last pren
+        //makes a new strign of the equation until the first pren + the result of wht was in the prens + the equation after the last pren
         string newparse = equation.substr(0, openprenIndex) + to_string(calculator(equation.substr(openprenIndex+1, closeprenIndex), error, lastAns)) + equation.substr(closeprenIndex+1);
-        //restcout << "equation: " << equation << " parsed to: " << newparse << "\n";
         //uses calculator to pars the new string
         return calculator(newparse, error, lastAns);
         //makes error if once pren exist but another does not
@@ -101,9 +101,9 @@ double calculator(string equation, string* error, double lastAns){
 
 }
 
-
+//program begins hear
 int main(){
-    //this happens when the program is first run
+    //this happens when the program is run for the first time
     string input;
     string error;
     double lastAns = 0;
@@ -113,7 +113,7 @@ int main(){
 
     //prints out the new message in later runs
     laterruns:
-    cout << "Enter Equation or type exit to exit (You can use ANS in the calculatior for last answer ex. 1*ans*3 or +5): ";
+    cout << "Enter Equation or type exit to exit (You can use ANS for last answer ex. 1*ans*3 or +5): ";
 
     //does the auctual code
     start:
@@ -125,7 +125,7 @@ int main(){
 
     //checks if the first char of the input is a math porator and puts ans before it if it is. allows +1 to act as ans+1
     char firstchar = input.at(0);
-    if((firstchar == '+') || (firstchar == '-') || (firstchar == '*') || (firstchar == '/')){
+    if((firstchar == '+') || (firstchar == '-') || (firstchar == '*') || (firstchar == '/') || (firstchar == '!')){
         input = "ans"+input;
     }
 
@@ -140,11 +140,6 @@ int main(){
         cout << "goodbye" << "\n";
         exit(0);
     }
-
-    // if(inputUpper.find("ANS") != string::npos && lastAns == -INT_MAX){
-    //     cout << "You cant get the answer without having previously entered in an equation \n";
-    //     goto laterruns;
-    // }
 
     //gets the vaue from the calculator
     //error has an and sign infromt of it beacuse it is being passed as a pointer so it can be updater from inside the function
